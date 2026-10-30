@@ -12,21 +12,29 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { php: '8.1', laravel: '10.*', testbench: '8.*', stability: 'prefer-lowest' }
-          - { php: '8.2', laravel: '10.*', testbench: '8.*', stability: 'prefer-stable' }
+          - { php: '8.2', laravel: '11.*', testbench: '9.*', stability: 'prefer-lowest' }
           - { php: '8.2', laravel: '11.*', testbench: '9.*', stability: 'prefer-stable' }
           - { php: '8.3', laravel: '12.*', testbench: '10.*', stability: 'prefer-stable' }
           - { php: '8.4', laravel: '13.*', testbench: '11.*', stability: 'prefer-stable' }
           - { php: '8.5', laravel: '13.*', testbench: '11.*', stability: 'prefer-stable' }
     name: PHP ${{ matrix.php }} - Laravel ${{ matrix.laravel }} (${{ matrix.stability }})
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: shivammathur/setup-php@v2
         with:
-          php: ${{ matrix.php }}
+          php-version: ${{ matrix.php }}
           coverage: none
-      - run: |
+      - name: Install dependencies
+        run: |
           composer require "illuminate/support:${{ matrix.laravel }}" --no-interaction --no-update
           composer require "orchestra/testbench:${{ matrix.testbench }}" --dev --no-interaction --no-update
           composer update --${{ matrix.stability }} --prefer-dist --no-interaction --no-progress
-      - run: vendor/bin/phpunit
+      - name: Run tests
+        run: |
+          set -o pipefail
+          vendor/bin/phpunit --no-progress 2>&1 | tee phpunit.txt || {
+            # Tampilkan ringkasan kegagalan sebagai anotasi agar terlihat tanpa membuka log
+            msg=$(tail -c 3500 phpunit.txt | sed ':a;N;$!ba;s/%/%25/g;s/\r/%0D/g;s/\n/%0A/g')
+            echo "::error title=PHPUnit gagal::${msg}"
+            exit 1
+          }

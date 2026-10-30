@@ -23,8 +23,8 @@ Event::listen(function (PaymentReceived $e) {
 
 ## Persyaratan
 
-- PHP 8.1 atau lebih baru
-- Laravel 10, 11, 12, atau 13
+- PHP 8.2 atau lebih baru
+- Laravel 11, 12, atau 13
 
 ## Instalasi
 
