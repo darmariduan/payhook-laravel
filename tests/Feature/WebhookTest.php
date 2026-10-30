@@ -14,9 +14,9 @@ class WebhookTest extends TestCase
         Event::fake([PaymentReceived::class]);
         $payload = $this->samplePayment(['event_id' => 'evt_dup_1']);
 
-        $this->payhookPost('/payhook/webhook', $payload)->assertOk()->assertJson(['status' => 'ok']);
-        // Retry dari PayHook (event_id sama, nonce baru) → tidak memicu event lagi
-        $this->payhookPost('/payhook/webhook', $payload)->assertOk()->assertJson(['status' => 'duplicate']);
+        $this->payhookPost('/payhook/webhook', $payload, [], time() - 1)->assertOk()->assertJson(['status' => 'ok']);
+        // Retry dari PayHook (event_id sama, ditandatangani ulang dengan timestamp baru) → tidak memicu event lagi
+        $this->payhookPost('/payhook/webhook', $payload, [], time())->assertOk()->assertJson(['status' => 'duplicate']);
 
         Event::assertDispatchedTimes(PaymentReceived::class, 1);
         Event::assertDispatched(PaymentReceived::class, fn ($e) => $e->payment->amount === 25000
@@ -80,8 +80,9 @@ class WebhookTest extends TestCase
         });
         $payload = $this->samplePayment(['event_id' => 'evt_retry_1']);
 
-        $this->payhookPost('/payhook/webhook', $payload)->assertStatus(500);
-        $this->payhookPost('/payhook/webhook', $payload)->assertOk()->assertJson(['status' => 'ok']);
+        $this->payhookPost('/payhook/webhook', $payload, [], time() - 1)->assertStatus(500);
+        // Retry PayHook selalu ditandatangani ulang dengan timestamp baru
+        $this->payhookPost('/payhook/webhook', $payload, [], time())->assertOk()->assertJson(['status' => 'ok']);
         $this->assertSame(2, $calls);
     }
 

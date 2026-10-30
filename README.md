@@ -24,7 +24,7 @@ Event::listen(function (PaymentReceived $e) {
 ## Persyaratan
 
 - PHP 8.2 atau lebih baru
-- Laravel 11, 12, atau 13
+- Laravel 12 atau 13
 
 ## Instalasi
 

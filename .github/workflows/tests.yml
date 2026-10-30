@@ -12,8 +12,8 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { php: '8.2', laravel: '11.*', testbench: '9.*', stability: 'prefer-lowest' }
-          - { php: '8.2', laravel: '11.*', testbench: '9.*', stability: 'prefer-stable' }
+          - { php: '8.2', laravel: '12.*', testbench: '10.*', stability: 'prefer-lowest' }
+          - { php: '8.2', laravel: '12.*', testbench: '10.*', stability: 'prefer-stable' }
           - { php: '8.3', laravel: '12.*', testbench: '10.*', stability: 'prefer-stable' }
           - { php: '8.4', laravel: '13.*', testbench: '11.*', stability: 'prefer-stable' }
           - { php: '8.5', laravel: '13.*', testbench: '11.*', stability: 'prefer-stable' }
@@ -34,6 +34,7 @@ jobs:
           set -o pipefail
           vendor/bin/phpunit --no-progress 2>&1 | tee phpunit.txt || {
             # Tampilkan ringkasan kegagalan sebagai anotasi agar terlihat tanpa membuka log
+            grep -E "^[0-9]+\) " phpunit.txt | head -10 | while read -r line; do echo "::error title=Test gagal::${line}"; done
             msg=$(tail -c 3500 phpunit.txt | sed ':a;N;$!ba;s/%/%25/g;s/\r/%0D/g;s/\n/%0A/g')
             echo "::error title=PHPUnit gagal::${msg}"
             exit 1
