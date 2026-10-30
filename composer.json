@@ -1,0 +1,60 @@
+{
+    "name": "darmariduan/payhook-laravel",
+    "description": "Terima webhook & heartbeat PayHook (notifikasi pembayaran bank/e-wallet → webhook) di Laravel: verifikasi token & HMAC, anti-replay, idempotensi, dan event siap pakai.",
+    "type": "library",
+    "license": "MIT",
+    "keywords": ["payhook", "laravel", "webhook", "qris", "payment", "indonesia", "notification"],
+    "homepage": "https://payhook.freehost.id",
+    "support": {
+        "issues": "https://github.com/darmariduan/payhook-laravel/issues",
+        "source": "https://github.com/darmariduan/payhook-laravel",
+        "docs": "https://payhook.freehost.id"
+    },
+    "authors": [
+        {
+            "name": "darmariduan",
+            "homepage": "https://github.com/darmariduan"
+        }
+    ],
+    "require": {
+        "php": "^8.1",
+        "illuminate/cache": "^10.0|^11.0|^12.0|^13.0",
+        "illuminate/contracts": "^10.0|^11.0|^12.0|^13.0",
+        "illuminate/events": "^10.0|^11.0|^12.0|^13.0",
+        "illuminate/http": "^10.0|^11.0|^12.0|^13.0",
+        "illuminate/routing": "^10.0|^11.0|^12.0|^13.0",
+        "illuminate/support": "^10.0|^11.0|^12.0|^13.0"
+    },
+    "require-dev": {
+        "orchestra/testbench": "^8.0|^9.0|^10.0|^11.0",
+        "phpunit/phpunit": "^10.5|^11.0|^12.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "PayHook\\Laravel\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "PayHook\\Laravel\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "PayHook\\Laravel\\PayHookServiceProvider"
+            ],
+            "aliases": {
+                "PayHook": "PayHook\\Laravel\\Facades\\PayHook"
+            }
+        }
+    },
+    "scripts": {
+        "test": "phpunit"
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}
