@@ -5,6 +5,7 @@ namespace PayHook\Laravel\Http\Controllers;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use PayHook\Laravel\Data\Heartbeat;
 use PayHook\Laravel\Events\HeartbeatReceived;
 use PayHook\Laravel\Exceptions\InvalidPayload;
@@ -26,7 +27,7 @@ class HeartbeatController
         }
 
         try {
-            $heartbeat = Heartbeat::fromArray($data, time());
+            $heartbeat = Heartbeat::fromArray($data, Carbon::now()->getTimestamp());
         } catch (InvalidPayload $e) {
             return new JsonResponse(['status' => 'error', 'message' => $e->getMessage()], 422);
         }

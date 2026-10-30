@@ -5,6 +5,7 @@ namespace PayHook\Laravel;
 use Illuminate\Contracts\Cache\Factory as CacheFactory;
 use Illuminate\Contracts\Cache\LockProvider;
 use Illuminate\Contracts\Cache\Repository;
+use Illuminate\Support\Carbon;
 use PayHook\Laravel\Data\Heartbeat;
 use PayHook\Laravel\Support\Signature;
 use PayHook\Laravel\Support\UniqueAmount;
@@ -42,7 +43,7 @@ class PayHookManager
      */
     public function sign(string $rawBody, ?int $timestamp = null, ?string $secret = null): array
     {
-        $ts = (string) ($timestamp ?? time());
+        $ts = (string) ($timestamp ?? Carbon::now()->getTimestamp());
         $secret ??= (string) ($this->config['secret'] ?? '');
 
         return [
@@ -100,7 +101,7 @@ class PayHookManager
         }
         $limit = $offlineAfter ?? (int) ($this->config['heartbeat']['offline_after'] ?? 900);
 
-        return (time() - (int) ($hb['received_at'] ?? 0)) <= $limit && ($hb['listener_connected'] ?? false) === true;
+        return (Carbon::now()->getTimestamp() - (int) ($hb['received_at'] ?? 0)) <= $limit && ($hb['listener_connected'] ?? false) === true;
     }
 
     /**

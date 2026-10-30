@@ -5,6 +5,7 @@ namespace PayHook\Laravel\Http\Middleware;
 use Closure;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
 use PayHook\Laravel\Support\ReplayGuard;
 use PayHook\Laravel\Support\RequestVerifier;
@@ -35,7 +36,7 @@ class VerifyPayHookRequest
         $result = $verifier->verify(
             fn (string $name) => $request->headers->get($name),
             $request->getContent(),
-            time(),
+            Carbon::now()->getTimestamp(),
         );
 
         if (! $result->ok) {
