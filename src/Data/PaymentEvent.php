@@ -29,6 +29,13 @@ final class PaymentEvent
         public readonly bool $isTest,
         /** @var array<string,mixed> */
         public readonly array $raw,
+        /** Kode ISO 4217 (PayHook v1.10+). Payload lama tanpa field currency dianggap "IDR". */
+        public readonly string $currency = 'IDR',
+        /**
+         * Nominal persis sebagai string desimal, mis. "12.50" → "12.5" (PayHook v1.10+).
+         * Payload lama: sama dengan amount. Pakai string agar tidak kehilangan presisi float.
+         */
+        public readonly string $amountDecimal = '',
     ) {
     }
 
@@ -65,6 +72,16 @@ final class PaymentEvent
             throw new InvalidPayload('amount harus bilangan bulat positif');
         }
 
+        $currency = $data['currency'] ?? null;
+        if ($currency === null || $currency === '') {
+            $currency = 'IDR';
+        } elseif (! is_string($currency) || preg_match('/^[A-Za-z]{3}$/', $currency) !== 1) {
+            throw new InvalidPayload('currency harus kode ISO 4217 tiga huruf');
+        }
+        $currency = strtoupper($currency);
+
+        $amountDecimal = self::decimal($data['amount_decimal'] ?? null, $amount);
+
         $ms = $data['timestamp_ms'] ?? null;
         $ms = is_int($ms) && $ms > 0 ? $ms : null;
 
@@ -86,7 +103,31 @@ final class PaymentEvent
             notificationText: self::str($data, 'notification_text', 1000),
             isTest: ($data['is_test'] ?? false) === true,
             raw: $data,
+            currency: $currency,
+            amountDecimal: $amountDecimal,
         );
+    }
+
+    /**
+     * amount_decimal harus angka desimal positif yang bagian bulatnya sama dengan amount;
+     * selain itu (atau tidak ada) dipakai amount.
+     */
+    private static function decimal(mixed $v, int $amount): string
+    {
+        if (is_int($v)) {
+            $v = (string) $v;
+        } elseif (is_float($v) && is_finite($v)) {
+            $v = rtrim(rtrim(number_format($v, 3, '.', ''), '0'), '.');
+        }
+        if (! is_string($v) || preg_match('/^(\d{1,13})(?:\.(\d{1,3}))?$/', $v, $m) !== 1) {
+            return (string) $amount;
+        }
+        if ((int) $m[1] !== $amount) {
+            return (string) $amount;
+        }
+        $frac = rtrim($m[2] ?? '', '0');
+
+        return $frac === '' ? (string) $amount : $amount . '.' . $frac;
     }
 
     /**

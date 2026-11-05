@@ -60,7 +60,9 @@ use PayHook\Laravel\Events\PaymentReceived;
 Event::listen(function (PaymentReceived $event) {
     $p = $event->payment;
 
-    // $p->amount        int     25000
+    // $p->amount        int     25000 (bagian bulat)
+    // $p->currency      string  "IDR" (kode ISO 4217; payload lama = "IDR")
+    // $p->amountDecimal string  "25000" / "12.5" (nominal persis, PayHook v1.10+)
     // $p->source        string  "BNI Merchant"
     // $p->counterparty  string  "GOPAY" (pengirim; bisa kosong)
     // $p->eventId       string  ID unik event

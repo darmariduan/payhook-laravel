@@ -1,5 +1,12 @@
 # Changelog
 
+## v1.1.0 - 2026-11-05
+
+- `PaymentEvent::$currency`: kode ISO 4217 dari field `currency` (PayHook v1.10+). Payload lama tanpa field ini dianggap `"IDR"`.
+- `PaymentEvent::$amountDecimal`: nominal persis sebagai string (mis. `"12.5"`) dari field `amount_decimal`; payload lama = `amount`.
+- `currency` yang bukan kode tiga huruf ditolak (`InvalidPayload`). `amount_decimal` yang tidak cocok dengan `amount` diabaikan.
+- Sepenuhnya kompatibel: field lama tidak berubah, parameter konstruktor baru opsional.
+
 ## v1.0.0 - 2026-10-30
 
 - Rilis pertama.

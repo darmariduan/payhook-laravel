@@ -64,6 +64,35 @@ class PayloadTest extends TestCase
         }
     }
 
+    public function test_currency_and_amount_decimal(): void
+    {
+        // Payload lama (sebelum PayHook v1.10): Rupiah, desimal = amount
+        $old = PaymentEvent::fromArray($this->sample());
+        $this->assertSame('IDR', $old->currency);
+        $this->assertSame('25000', $old->amountDecimal);
+
+        $usd = PaymentEvent::fromArray($this->sample(['amount' => 12, 'currency' => 'usd', 'amount_decimal' => 12.5]));
+        $this->assertSame('USD', $usd->currency);
+        $this->assertSame('12.5', $usd->amountDecimal);
+
+        $kwd = PaymentEvent::fromArray($this->sample(['amount' => 1, 'currency' => 'KWD', 'amount_decimal' => '1.500']));
+        $this->assertSame('1.5', $kwd->amountDecimal);
+
+        // Tidak konsisten dengan amount / bukan angka → pakai amount
+        $this->assertSame('25000', PaymentEvent::fromArray($this->sample(['amount_decimal' => 99.5]))->amountDecimal);
+        $this->assertSame('25000', PaymentEvent::fromArray($this->sample(['amount_decimal' => '1e5']))->amountDecimal);
+        $this->assertSame('25000', PaymentEvent::fromArray($this->sample(['amount_decimal' => 25000]))->amountDecimal);
+
+        foreach (['RUPIAH', 'U$', 12, ['IDR']] as $bad) {
+            try {
+                PaymentEvent::fromArray($this->sample(['currency' => $bad]));
+                $this->fail('currency harus ditolak: ' . json_encode($bad));
+            } catch (InvalidPayload) {
+                $this->assertTrue(true);
+            }
+        }
+    }
+
     public function test_sanitizes_strings(): void
     {
         $p = PaymentEvent::fromArray($this->sample(['payer' => "A\x00B\nC" . str_repeat('x', 500), 'is_test' => 'yes']));
